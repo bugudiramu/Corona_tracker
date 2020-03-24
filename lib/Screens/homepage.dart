@@ -64,6 +64,7 @@ class _HomePageState extends State<HomePage> {
         ),
         body: isLoading == false
             ? SingleChildScrollView(
+                physics: BouncingScrollPhysics(),
                 child: Column(
                   children: <Widget>[
                     Padding(
@@ -85,7 +86,6 @@ class _HomePageState extends State<HomePage> {
                                 autofocus: false,
                                 enableSuggestions: true,
                                 cursorColor: Colors.purple,
-                                scrollPhysics: ClampingScrollPhysics(),
                                 controller: countryController,
                                 toolbarOptions: ToolbarOptions(
                                     copy: true,
@@ -102,7 +102,7 @@ class _HomePageState extends State<HomePage> {
                                           onPressed: () {
                                             countryController.text = "";
                                           }),
-                                  hintText: 'Enter country ',
+                                  hintText: 'Search for a country... ',
                                   contentPadding: EdgeInsets.fromLTRB(
                                       20.0, 15.0, 20.0, 15.0),
                                 ),
@@ -116,6 +116,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                           ),
+                          SizedBox(width: 4),
                           Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(2.0),
@@ -167,45 +168,48 @@ Widget customBoxContainer(double height, double width, allData) {
       grids = 4;
       fontSize = 22.0;
     }
-    return Container(
-      height: height,
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(16.0),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: grids, crossAxisSpacing: 16, mainAxisSpacing: 16),
-        itemCount: allData == null ? 0 : allData.length,
-        itemBuilder: (context, i) => Container(
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                "Country : ${allData[i]["countryRegion"]}",
-              ),
-              Text(
-                "State : ${allData[i]["provinceState"] == null ? allData[i]["countryRegion"] : allData[i]["provinceState"]}",
-              ),
-              Text(
-                "Confirmed : ${allData[i]["confirmed"]}",
-              ),
-              Text(
-                "Deaths : ${allData[i]["deaths"]}",
-              ),
-              Text(
-                "Recovered : ${allData[i]["recovered"]}",
-              ),
-              Text(
-                "Active : ${allData[i]["active"]}",
-              ),
-            ],
+    return Scrollbar(
+      child: Container(
+        height: height,
+        child: GridView.builder(
+          physics: BouncingScrollPhysics(),
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(16.0),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: grids, crossAxisSpacing: 16, mainAxisSpacing: 16),
+          itemCount: allData == null ? 0 : allData.length,
+          itemBuilder: (context, i) => Container(
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "Country : ${allData[i]["countryRegion"]}",
+                ),
+                Text(
+                  "State : ${allData[i]["provinceState"] == null ? allData[i]["countryRegion"] : allData[i]["provinceState"]}",
+                ),
+                Text(
+                  "Confirmed : ${allData[i]["confirmed"]}",
+                ),
+                Text(
+                  "Deaths : ${allData[i]["deaths"]}",
+                ),
+                Text(
+                  "Recovered : ${allData[i]["recovered"]}",
+                ),
+                Text(
+                  "Active : ${allData[i]["active"]}",
+                ),
+              ],
+            ),
           ),
         ),
       ),

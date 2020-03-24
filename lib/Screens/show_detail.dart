@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ShowDetail extends StatefulWidget {
   var data, countryTitle;
@@ -24,21 +25,26 @@ class _ShowDetailState extends State<ShowDetail> {
       ),
       body: Center(
         child: LayoutBuilder(builder: (_, constraints) {
+          var formatDate = DateTime.tryParse("${widget.data["lastUpdate"]}");
+          String formattedDate =
+              DateFormat('EEE, M/d/y, kk:mm').format(formatDate);
+          debugPrint(formattedDate);
           if (constraints.maxWidth < 600) {
-            // height = height / 2;
-            // width = width - 40;
-            height = 250;
-            width = 250;
-          } else if (constraints.maxWidth > 600 && constraints.maxWidth < 800) {
+            height = height / 2;
+            width = width - 40;
+            // height = 250;
+            // width = 250;
+          } /* else if (constraints.maxWidth > 600 && constraints.maxWidth < 800) {
             // height = height / 2;
             // width = width - 80;
             height = 250;
             width = 250;
-          } else {
-            // height = height / 2;
-            // width = width / 2;
-            height = 250;
-            width = 250;
+          } */
+          else {
+            height = height / 2;
+            width = width / 2;
+            // height = 250;
+            // width = 250;
           }
           return Container(
             height: height,
@@ -54,9 +60,22 @@ class _ShowDetailState extends State<ShowDetail> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text("Confirmed : ${widget.data["confirmed"]["value"]}"),
-                Text("Deaths : ${widget.data["deaths"]["value"]}"),
-                Text("Recovered : ${widget.data["recovered"]["value"]}"),
+                Text(
+                  "Confirmed : ${widget.data["confirmed"]["value"]}",
+                  style: Theme.of(context).textTheme.title,
+                ),
+                Text(
+                  "Deaths : ${widget.data["deaths"]["value"]}",
+                  style: Theme.of(context).textTheme.title,
+                ),
+                Text(
+                  "Recovered : ${widget.data["recovered"]["value"]}",
+                  style: Theme.of(context).textTheme.title,
+                ),
+                Text(
+                  "Last Updated : $formattedDate",
+                  style: Theme.of(context).textTheme.title,
+                ),
               ],
             ),
           );
