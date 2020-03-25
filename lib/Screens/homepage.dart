@@ -17,6 +17,7 @@ class _HomePageState extends State<HomePage> {
   bool showicon;
   Map<String, dynamic> data;
   List allData = [];
+  Map<String, dynamic> totalData;
   List<ConfirmedModel> confirmedData = List<ConfirmedModel>();
   bool isLoading = true;
   var countryController = TextEditingController();
@@ -40,22 +41,87 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Future<void> getTotalData() async {
+    String url = "https://covid19.mathdro.id/api";
+    http.Response response = await http.get(Uri.encodeFull(url));
+    var jsonData = await jsonDecode(response.body);
+    setState(() {
+      totalData = jsonData;
+      isLoading = false;
+    });
+    debugPrint(totalData.toString());
+  }
+
+  _showTotalDataDialog(Map<String, dynamic> totalData) {
+    return showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Corona Stats - Overall", textAlign: TextAlign.center),
+        content: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              SelectableText(
+                "Confirmed Cases : ${totalData["confirmed"]["value"]}"
+                    .toUpperCase(),
+              ),
+              SizedBox(height: 8.0),
+              SelectableText(
+                "Total Deaths : ${totalData["deaths"]["value"]}".toUpperCase(),
+              ),
+              SizedBox(height: 8.0),
+              SelectableText(
+                "Recovered : ${totalData["recovered"]["value"]}".toUpperCase(),
+              ),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          MaterialButton(
+              color: Colors.green,
+              onPressed: () => Navigator.pop(context),
+              child: Text("Done")),
+        ],
+      ),
+    );
+  }
+
+  Future _refresh() async {
+    print("Refrshing");
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
-    // getCoronaData("USA");
-
+    isLoading = true;
+    // _showTotalDataDialog(totalData);
+    getTotalData();
     getAllCoronaData();
     showicon = false;
+    Future.delayed(Duration(seconds: 2), () => _showTotalDataDialog(totalData));
   }
 
   @override
   Widget build(BuildContext context) {
     height = MediaQuery.of(context).size.height;
     width = MediaQuery.of(context).size.width;
+
+    /* SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.white,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.light,
+      ),
+    );*/
+
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.transparent,
+          backgroundColor: Colors.white,
           elevation: 0.0,
           title: Text(
             "Corona Tracker",
@@ -142,13 +208,16 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     ),
-                    customBoxContainer(height, width, allData),
+                    RefreshIndicator(
+                        onRefresh: _refresh,
+                        child: customBoxContainer(height, width, allData)),
                   ],
                 ),
               )
             : LinearProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 backgroundColor: Colors.purpleAccent,
+                semanticsLabel: "Loading",
               ));
   }
 }
@@ -178,37 +247,39 @@ Widget customBoxContainer(double height, double width, allData) {
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: grids, crossAxisSpacing: 16, mainAxisSpacing: 16),
           itemCount: allData == null ? 0 : allData.length,
-          itemBuilder: (context, i) => Container(
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  "Country : ${allData[i]["countryRegion"]}",
+          itemBuilder: (context, i) => ClipRRect(
+            borderRadius: BorderRadius.circular(10.0),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    SelectableText(
+                      "Country : ${allData[i]["countryRegion"]}".toUpperCase(),
+                    ),
+                    SelectableText(
+                      "State : ${allData[i]["provinceState"] == null ? allData[i]["countryRegion"] : allData[i]["provinceState"]}"
+                          .toUpperCase(),
+                    ),
+                    SelectableText(
+                      "Confirmed : ${allData[i]["confirmed"]}".toUpperCase(),
+                    ),
+                    SelectableText(
+                      "Deaths : ${allData[i]["deaths"]}".toUpperCase(),
+                    ),
+                    SelectableText(
+                      "Recovered : ${allData[i]["recovered"]}".toUpperCase(),
+                    ),
+                    SelectableText(
+                      "Active : ${allData[i]["active"]}",
+                    ),
+                  ],
                 ),
-                Text(
-                  "State : ${allData[i]["provinceState"] == null ? allData[i]["countryRegion"] : allData[i]["provinceState"]}",
-                ),
-                Text(
-                  "Confirmed : ${allData[i]["confirmed"]}",
-                ),
-                Text(
-                  "Deaths : ${allData[i]["deaths"]}",
-                ),
-                Text(
-                  "Recovered : ${allData[i]["recovered"]}",
-                ),
-                Text(
-                  "Active : ${allData[i]["active"]}",
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -216,3 +287,21 @@ Widget customBoxContainer(double height, double width, allData) {
     );
   });
 }
+
+/**
+ *       decoration: BoxDecoration(
+              // color: Colors.white.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10.0),
+              shape: BoxShape.rectangle,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.white,
+                  offset: Offset(0.0, 1.0), //(x,y)
+                  blurRadius: 6.0,
+                ),
+              ],
+            ),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+ */
