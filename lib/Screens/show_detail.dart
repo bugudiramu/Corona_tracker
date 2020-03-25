@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:random_color/random_color.dart';
 
 class ShowDetail extends StatefulWidget {
   var data, countryTitle;
@@ -10,7 +9,6 @@ class ShowDetail extends StatefulWidget {
 }
 
 class _ShowDetailState extends State<ShowDetail> {
-  RandomColor randomColor = RandomColor();
 
   @override
   Widget build(BuildContext context) {
